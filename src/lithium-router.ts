@@ -40,14 +40,8 @@ export type BeforeRouteCallback = (
   styles: []
 })
 export class LithiumRouter extends LithiumElement {
-  
-  static get properties() {
-    return {
-      beforeRoute: { attribute: false }
-    };
-  }
-
-  beforeRoute?: BeforeRouteCallback;
+  /** Callback a ejecutar antes de cada navegación */
+  @property({ attribute: false }) beforeRoute?: BeforeRouteCallback;
 
   private currentPath: string = '';
   private observer?: MutationObserver;

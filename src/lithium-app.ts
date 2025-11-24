@@ -117,6 +117,7 @@ export function defineApp(options: DefineAppOptions) {
       );
     }
 
+    // Crear clase extendida con configuración
     const ExtendedClass = class extends (target as any) {
       static styles = (() => {
         if (styles && styles.length > 0) {
@@ -124,6 +125,7 @@ export function defineApp(options: DefineAppOptions) {
             typeof style === 'string' ? unsafeCSS(style) : style
           );
           
+          // Combinar estilos base con los nuevos estilos
           const baseStyles = Array.isArray(super.styles) 
             ? super.styles 
             : [super.styles];
@@ -135,6 +137,7 @@ export function defineApp(options: DefineAppOptions) {
 
       constructor(...args: any[]) {
         super(...args);
+        // Inicializar el router con las rutas principales
         this._router = new Router(this as unknown as ReactiveControllerHost & HTMLElement, routes);
 
         if (options.i18n && typeof window !== 'undefined') {

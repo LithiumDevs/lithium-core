@@ -1,8 +1,9 @@
-import { html, ReactiveControllerHost, type TemplateResult } from 'lit';
+import { html, type TemplateResult } from 'lit';
 import { Routes } from '@lit-labs/router/routes.js';
 import { LithiumElement } from './lithium-element.js';
 import { unsafeCSS } from '@lit/reactive-element/css-tag.js';
 import type { CSSResultGroup } from '@lit/reactive-element/css-tag.js';
+import { ReactiveControllerHost } from 'lit';
 
 /**
  * Opciones para definir un módulo
@@ -115,7 +116,8 @@ export function defineModule(options: DefineModuleOptions) {
 
       constructor(...args: any[]) {
         super(...args);
-        this._router = new Routes(this as unknown as ReactiveControllerHost & HTMLElement, routes);
+        // Inicializar el router con las rutas del módulo
+        this._routes = new Routes(this as unknown as ReactiveControllerHost & HTMLElement, routes);
       }
     };
 

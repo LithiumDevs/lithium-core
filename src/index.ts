@@ -9,9 +9,12 @@ export { LithiumModule, defineModule, type DefineModuleOptions } from './lithium
 export { LithiumApp, defineApp, type DefineAppOptions } from './lithium-app.js';
 export { EventBus } from './event-bus.js';
 
+// Decoradores de carga diferida
 export { defer, type DeferOptions } from './decorators/defer.js';
 export { lazy, type LazyOptions } from './decorators/lazy.js';
 export { delay, type DelayOptions } from './decorators/delay.js';
 export { conditional } from './decorators/conditional.js';
 
+// Router wrapper con beforeRoute callback (auto-registra el componente)
 export { LithiumRouter, type BeforeRouteCallback, type BeforeRouteResult } from './lithium-router.js';
+import './lithium-router.js'; // ← Esto registra el componente automáticamente
