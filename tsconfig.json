@@ -8,7 +8,6 @@
     "allowSyntheticDefaultImports": true,
     "skipLibCheck": true,
     "strict": false,
-    "outDir": "dist",
   },
   "include": ["src"]
 }
