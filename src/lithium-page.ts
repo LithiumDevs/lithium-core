@@ -63,18 +63,20 @@ export function definePage(options: DefinePageOptions) {
     // Guardar el tag name como propiedad estática para el router
     (constructor as any).tagName = tag;
 
-    // Aplicar estilos si fueron proporcionados
     if (styles && styles.length > 0) {
       const cssResults = styles.map(style => 
         typeof style === 'string' ? unsafeCSS(style) : style
       );
-      
-      // Combinar estilos base de LithiumElement con los nuevos estilos
-      const baseStyles = Array.isArray(LithiumElement.styles) 
-        ? LithiumElement.styles 
-        : [LithiumElement.styles];
-      
-      (constructor as any).styles = [...baseStyles, ...cssResults];
+
+      const base = LithiumElement.styles;
+
+      if (!base) {
+        (constructor as any).styles = [...cssResults];
+      } else {
+        (constructor as any).styles = Array.isArray(base) 
+        ? [...base, ...cssResults] 
+        : [base, ...cssResults];
+      }
     }
 
     // Si se especificó un título, sobrescribir connectedCallback

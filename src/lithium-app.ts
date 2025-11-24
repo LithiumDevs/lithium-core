@@ -120,18 +120,19 @@ export function defineApp(options: DefineAppOptions) {
     // Crear clase extendida con configuración
     const ExtendedClass = class extends (target as any) {
       static styles = (() => {
-        if (styles && styles.length > 0) {
-          const cssResults = styles.map(style => 
-            typeof style === 'string' ? unsafeCSS(style) : style
+        if (styles?.length) {
+          const cssResults = styles.map(s => 
+            typeof s === 'string' ? unsafeCSS(s) : s
           );
+
+          const base = super.styles;
+          if (!base) return cssResults;
           
-          // Combinar estilos base con los nuevos estilos
-          const baseStyles = Array.isArray(super.styles) 
-            ? super.styles 
-            : [super.styles];
-          
-          return [...baseStyles, ...cssResults];
+          return Array.isArray(base)
+            ? [...base, ...cssResults]
+            : [base, ...cssResults];
         }
+        
         return super.styles;
       })();
 

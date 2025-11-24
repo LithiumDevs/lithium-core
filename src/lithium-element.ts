@@ -366,13 +366,16 @@ export function defineElement(options: DefineElementOptions | string) {
       const cssResults = styles.map(style => 
         typeof style === 'string' ? unsafeCSS(style) : style
       );
-      
-      // Combinar estilos base de LithiumElement con los nuevos estilos
-      const baseStyles = Array.isArray(LithiumElement.styles) 
-        ? LithiumElement.styles 
-        : [LithiumElement.styles];
-      
-      (constructor as any).styles = [...baseStyles, ...cssResults];
+
+      const base = LithiumElement.styles;
+
+      if (!base) {
+        (constructor as any).styles = [...cssResults];
+      } else {
+        (constructor as any).styles = Array.isArray(base) 
+        ? [...base, ...cssResults] 
+        : [base, ...cssResults];
+      }
     }
 
     // Registrar el elemento personalizado
