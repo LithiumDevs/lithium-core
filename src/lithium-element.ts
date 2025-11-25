@@ -3,6 +3,7 @@ import { unsafeCSS } from '@lit/reactive-element/css-tag.js';
 import { SignalWatcher, type Signal } from '@lit-labs/signals';
 import type { CSSResultGroup } from '@lit/reactive-element/css-tag.js';
 import { EventBus } from './event-bus.js';
+import globalStyle from '@app-styles/global.css?inline';
 
 /**
  * Tipo de almacenamiento para canales
@@ -293,6 +294,10 @@ export abstract class LithiumElement extends SignalWatcher(LitElement) {
   ): () => void {
     return EventBus.once(eventName, listener);
   }
+
+  static styles = [
+    unsafeCSS(globalStyle)
+  ];
 }
 
 /**
