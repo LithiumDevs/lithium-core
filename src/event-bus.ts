@@ -69,6 +69,7 @@ interface Channel<T = any> {
   autoCleanup: boolean;
   timeoutId?: ReturnType<typeof setTimeout>;
   createdAt: number;
+  lastUpdated: number | null; // 👈 Timestamp de la última actualización
   config?: ChannelConfig<T>; // 👈 Guardar config para acceder a hooks
   isInitialized: boolean; // 👈 Para detectar onInit
   onChangeDebounceTimer?: ReturnType<typeof setTimeout>; // 👈 Para debounce
@@ -175,6 +176,7 @@ export class EventBus {
       ttl,
       autoCleanup,
       createdAt: Date.now(),
+      lastUpdated: null, // 👈 Inicialmente null hasta el primer publish
       config, // 👈 Guardar config para acceder a hooks
       isInitialized, // 👈 Para detectar onInit
     };
@@ -240,6 +242,9 @@ export class EventBus {
 
     // 3️⃣ Actualizar signal
     channel.signal.set(transformedValue);
+
+    // 🔥 Actualizar timestamp de última modificación
+    channel.lastUpdated = Date.now();
 
     // 4️⃣ Persistir en storage
     if (channel.storage !== 'memory') {
@@ -440,14 +445,20 @@ export class EventBus {
     const channel = this.channels.get(channelName);
     if (!channel) return undefined;
 
+    const now = Date.now();
     return {
+      name: channelName,
+      value: channel.signal.get(),
       storage: channel.storage,
       storageKey: channel.storageKey,
       subscribersCount: channel.subscribers.size,
+      isBeingWatched: channel.subscribers.size > 0,
       ttl: channel.ttl,
       autoCleanup: channel.autoCleanup,
       createdAt: channel.createdAt,
-      age: Date.now() - channel.createdAt,
+      lastUpdated: channel.lastUpdated,
+      age: now - channel.createdAt,
+      timeSinceLastUpdate: channel.lastUpdated ? now - channel.lastUpdated : null,
     };
   }
 
@@ -456,6 +467,43 @@ export class EventBus {
    */
   static listChannels(): string[] {
     return Array.from(this.channels.keys());
+  }
+
+  /**
+   * Obtiene información detallada de todos los canales activos
+   * 
+   * @returns Array con información de todos los canales
+   * 
+   * @example
+   * ```typescript
+   * const channels = EventBus.getAllChannels();
+   * console.table(channels);
+   * 
+   * // Filtrar canales con suscriptores
+   * const watchedChannels = channels.filter(ch => ch.isBeingWatched);
+   * 
+   * // Ordenar por última actualización
+   * const recent = channels
+   *   .filter(ch => ch.lastUpdated)
+   *   .sort((a, b) => b.lastUpdated! - a.lastUpdated!);
+   * ```
+   */
+  static getAllChannels() {
+    const now = Date.now();
+    return Array.from(this.channels.entries()).map(([name, channel]) => ({
+      name,
+      value: channel.signal.get(),
+      storage: channel.storage,
+      storageKey: channel.storageKey,
+      subscribersCount: channel.subscribers.size,
+      isBeingWatched: channel.subscribers.size > 0,
+      ttl: channel.ttl,
+      autoCleanup: channel.autoCleanup,
+      createdAt: channel.createdAt,
+      lastUpdated: channel.lastUpdated,
+      age: now - channel.createdAt,
+      timeSinceLastUpdate: channel.lastUpdated ? now - channel.lastUpdated : null,
+    }));
   }
 
   // ==========================================

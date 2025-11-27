@@ -16,11 +16,11 @@ export type StorageType = 'memory' | 'session' | 'local';
  */
 export abstract class LithiumElement extends SignalWatcher(LitElement) {
   /**
-   * Emite un evento personalizado hacia arriba en el árbol de componentes
+   * Emite un evento personalizado hacia arriba en el 谩rbol de componentes
    * Similar a $emit en Vue o eventos en Angular
    * 
    * @param eventName - Nombre del evento a emitir
-   * @param detail - Datos que se enviarán con el evento
+   * @param detail - Datos que se enviar谩n con el evento
    * @param options - Opciones adicionales del evento (bubbles, composed, etc)
    * 
    * @example
@@ -51,20 +51,20 @@ export abstract class LithiumElement extends SignalWatcher(LitElement) {
 
   /**
    * Navega a otra ruta
-   * Emite un evento que lithium-router intercepta para validación
+   * Emite un evento que lithium-router intercepta para validaci贸n
    * 
    * @param path - Ruta a la que navegar (puede ser relativa o absoluta)
-   * @param options - Opciones de navegación
+   * @param options - Opciones de navegaci贸n
    * 
    * @example
    * ```typescript
-   * // Navegación simple
+   * // Navegaci贸n simple
    * this.navigate('/dashboard');
    * 
-   * // Navegación con reemplazo (no crea entrada en historial)
+   * // Navegaci贸n con reemplazo (no crea entrada en historial)
    * this.navigate('/login', { replace: true });
    * 
-   * // Navegación con estado
+   * // Navegaci贸n con estado
    * this.navigate('/profile/123', { state: { from: 'home' } });
    * ```
    */
@@ -74,7 +74,7 @@ export abstract class LithiumElement extends SignalWatcher(LitElement) {
   ): void {
     const { replace = false, state = {} } = options || {};
     
-    // Emitir evento de navegación que lithium-router puede interceptar
+    // Emitir evento de navegaci贸n que lithium-router puede interceptar
     EventBus.emit('lithium:navigate', {
       path,
       replace,
@@ -85,10 +85,10 @@ export abstract class LithiumElement extends SignalWatcher(LitElement) {
 
   /**
    * Crea o accede a un canal con Signal
-   * El signal es reactivo y automáticamente re-renderiza el componente cuando cambia
+   * El signal es reactivo y autom谩ticamente re-renderiza el componente cuando cambia
    * 
    * @param channelName - Nombre del canal
-   * @param options - Configuración del canal (valor inicial, storage, hooks, etc)
+   * @param options - Configuraci贸n del canal (valor inicial, storage, hooks, etc)
    * @returns Signal del canal
    * 
    * @example
@@ -113,7 +113,7 @@ export abstract class LithiumElement extends SignalWatcher(LitElement) {
    * const searchSignal = this.channel('search:query', {
    *   initialValue: '',
    *   onChange: (query) => this.search(query),
-   *   debounce: 500 // onChange se ejecuta 500ms después del último cambio
+   *   debounce: 500 // onChange se ejecuta 500ms despu茅s del 煤ltimo cambio
    * });
    * 
    * // Usar en render (auto-reactivo)
@@ -131,7 +131,7 @@ export abstract class LithiumElement extends SignalWatcher(LitElement) {
       storageKey?: string;
       ttl?: number;
       autoCleanup?: boolean;
-      // 🔥 Hooks
+      // 馃敟 Hooks
       onChange?: (newValue: T, oldValue: T) => void;
       onInit?: (value: T) => void;
       onClear?: () => void;
@@ -147,7 +147,7 @@ export abstract class LithiumElement extends SignalWatcher(LitElement) {
   /**
    * Publica un valor en un canal
    * - Actualiza el signal (reactivo)
-   * - Persiste en storage si está configurado
+   * - Persiste en storage si est谩 configurado
    * - Notifica a todos los suscriptores
    * 
    * @param channelName - Nombre del canal
@@ -158,7 +158,7 @@ export abstract class LithiumElement extends SignalWatcher(LitElement) {
    * // Publicar datos de usuario
    * this.publish('user:current', { id: 123, name: 'John' });
    * 
-   * // Todos los componentes con channel('user:current') se actualizan automáticamente
+   * // Todos los componentes con channel('user:current') se actualizan autom谩ticamente
    * ```
    */
   protected publish<T = any>(channelName: string, data: T): void {
@@ -167,11 +167,11 @@ export abstract class LithiumElement extends SignalWatcher(LitElement) {
 
   /**
    * Se suscribe a cambios en un canal
-   * Útil cuando necesitas ejecutar efectos secundarios
+   * 脷til cuando necesitas ejecutar efectos secundarios
    * 
    * @param channelName - Nombre del canal
-   * @param callback - Función que se ejecuta cuando cambia el valor
-   * @returns Función para cancelar la suscripción
+   * @param callback - Funci贸n que se ejecuta cuando cambia el valor
+   * @returns Funci贸n para cancelar la suscripci贸n
    * 
    * @example
    * ```typescript
@@ -198,12 +198,95 @@ export abstract class LithiumElement extends SignalWatcher(LitElement) {
     return EventBus.subscribe(channelName, callback);
   }
 
+  /**
+   * Elimina un canal completamente (signal, storage y suscriptores)
+   * 
+   * @param channelName - Nombre del canal a eliminar
+   * 
+   * @example
+   * ```typescript
+   * // Crear canal temporal
+   * this.channel('temp:data', {
+   *   initialValue: [],
+   *   storage: 'memory',
+   *   onClear: () => console.log('Canal eliminado')
+   * });
+   * 
+   * // Usar el canal...
+   * this.publish('temp:data', [1, 2, 3]);
+   * 
+   * // Eliminarlo cuando ya no se necesite
+   * this.clear('temp:data');
+   * ```
+   */
+  protected clear(channelName: string): void {
+    EventBus.clear(channelName);
+  }
+
+  /**
+   * Elimina todos los canales o solo los de un tipo de storage espec铆fico
+   * 
+   * @param storageOnly - Tipo de storage a limpiar (opcional)
+   * 
+   * @example
+   * ```typescript
+   * // Limpiar todos los canales
+   * this.clearAll();
+   * 
+   * // Limpiar solo canales de memoria
+   * this.clearAll('memory');
+   * 
+   * // Limpiar solo canales de sessionStorage
+   * this.clearAll('session');
+   * 
+   * // Limpiar solo canales de localStorage
+   * this.clearAll('local');
+   * ```
+   */
+  protected clearAll(storageOnly?: StorageType): void {
+    EventBus.clearAll(storageOnly);
+  }
+
+  /**
+   * Obtiene informaci贸n detallada de todos los canales activos
+   * 脷til para debugging y monitoreo del estado global
+   * 
+   * @returns Array con informaci贸n de cada canal
+   * 
+   * @example
+   * ```typescript
+   * // Ver todos los canales en consola
+   * const channels = this.getAllChannels();
+   * console.table(channels);
+   * 
+   * // Filtrar canales con suscriptores activos
+   * const watchedChannels = this.getAllChannels()
+   *   .filter(ch => ch.isBeingWatched);
+   * 
+   * // Ordenar por 煤ltima actualizaci贸n (m谩s recientes primero)
+   * const recentChannels = this.getAllChannels()
+   *   .filter(ch => ch.lastUpdated)
+   *   .sort((a, b) => b.lastUpdated! - a.lastUpdated!);
+   * 
+   * // Encontrar canales sin actualizar
+   * const neverUpdated = this.getAllChannels()
+   *   .filter(ch => ch.lastUpdated === null);
+   * 
+   * // Ver canales de sessionStorage
+   * const sessionChannels = this.getAllChannels()
+   *   .filter(ch => ch.storage === 'session');
+   * ```
+   */
+  protected getAllChannels() {
+    return EventBus.getAllChannels();
+  }
+
   // ==========================================
-  // Sistema de Eventos Instantáneos
+  // Sistema de Eventos Instant谩neos
   // ==========================================
 
   /**
-   * Emite un evento instantáneo sin persistencia (fire-and-forget)
+   * Emite un evento instant谩neo sin persistencia (fire-and-forget)
    * El evento no se guarda en memoria, solo notifica a los listeners actuales
    * 
    * @param eventName - Nombre del evento
@@ -211,10 +294,10 @@ export abstract class LithiumElement extends SignalWatcher(LitElement) {
    * 
    * @example
    * ```typescript
-   * // Emitir evento de acción completada
+   * // Emitir evento de acci贸n completada
    * this.emit('form:submitted', { success: true });
    * 
-   * // Emitir evento de notificación
+   * // Emitir evento de notificaci贸n
    * this.emit('toast:show', { message: 'Guardado!', type: 'success' });
    * 
    * // Emitir sin datos
@@ -226,12 +309,12 @@ export abstract class LithiumElement extends SignalWatcher(LitElement) {
   }
 
   /**
-   * Escucha un evento instantáneo
+   * Escucha un evento instant谩neo
    * 
    * @param eventName - Nombre del evento
-   * @param listener - Función que se ejecuta cuando se emite el evento
+   * @param listener - Funci贸n que se ejecuta cuando se emite el evento
    * @param options - Opciones del listener (validate, transform, debounce, throttle, once)
-   * @returns Función para dejar de escuchar
+   * @returns Funci贸n para dejar de escuchar
    * 
    * @example
    * ```typescript
@@ -243,7 +326,7 @@ export abstract class LithiumElement extends SignalWatcher(LitElement) {
    *     this.showToast(data.message, data.type);
    *   });
    *   
-   *   // Con opciones: solo errors, máximo 1 cada segundo
+   *   // Con opciones: solo errors, m谩ximo 1 cada segundo
    *   this._unlistenError = this.on('toast:show', (data) => {
    *     this.showErrorToast(data);
    *   }, {
@@ -312,7 +395,7 @@ interface DefineElementOptions {
 
 /**
  * Decorador para definir un elemento personalizado con estilos opcionales
- * Registra automáticamente el elemento en el CustomElementRegistry
+ * Registra autom谩ticamente el elemento en el CustomElementRegistry
  * 
  * @param options - Configuración del elemento (tag y estilos opcionales)
  * 
@@ -363,7 +446,7 @@ export function defineElement(options: DefineElementOptions | string) {
 
     const { tag, styles } = config;
 
-    // Guardar el tag name como propiedad estática para el router
+    // Guardar el tag name como propiedad est谩tica para el router
     (constructor as any).tagName = tag;
 
     // Aplicar estilos si fueron proporcionados
